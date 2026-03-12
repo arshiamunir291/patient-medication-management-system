@@ -1,1 +1,31 @@
-<p>medication-card works!</p>
+<div [formGroup]="group()">
+    <h4>Medication {{index()+1}}</h4>
+    <label>Drug Name</label>
+    <input type="text" formControlName="drugName">
+    <div formGroupName="dosage">
+        <label>Dosage</label>
+        <input type="number" formControlName="value">
+        <select formControlName="unit">
+            @for (unit of dosageUnits; track unit) {
+                <option [value]="unit">{{unit}}</option>
+            }
+        </select>
+    </div>
+    <label>Routes</label>
+    <select formControlName="routes">
+        <option value="">Routes</option>
+        @for (route of routes; track route) {
+            <option [value]="route">{{route}}</option>
+        }
+    </select>
+    <label>Frequency</label>
+    <select formControlName="frequency">
+        <option value="">Frequency</option>
+        @for (frequency of frequencies; track frequency) {
+            <option [value]="frequency">{{ frequency}}</option>
+        }
+    </select>
+    <label>Instructions</label>
+    <textarea formControlName="instructions"></textarea>
+    <button type="button" (click)="removeMedication()">Remove Medication</button>
+</div>

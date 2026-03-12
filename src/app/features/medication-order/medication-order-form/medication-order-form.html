@@ -1,1 +1,40 @@
-<p>medication-order-form works!</p>
+<form [formGroup]="form">
+    <h2>Medication Order Form</h2>
+    <div>
+        <h4>Patient Info</h4>
+        <div formGroupName="patientInfo">
+            <label>Patient Id</label>
+            <input type="text" formControlName="patientId">
+            <label>Order Date</label>
+            <input type="date" formControlName="orderDate">
+        </div>
+    </div>
+    <div>
+        <h4>Prescribing Info</h4>
+        <div formGroupName="prescribingInfo">
+            <label>Physician</label>
+            <input type="text" formControlName="physician">
+            <label>Therapy Type</label>
+            <select formControlName="therapyType">
+                <option value="">Select Type</option>
+                @for (therapyType of therapyTypes; track therapyType) {
+                    <option [value]="therapyType">{{therapyType}}</option>
+                }
+            </select>
+            <label>Diagnosis</label>
+            <input type="text" formControlName="diagnosis">
+        </div>
+    </div>
+    <div>
+        <h4>Medications</h4>
+        <div formArrayName="medications">
+            @for (medication of medications.controls; track $index; let i=$index) {
+            <app-medication-card [group]="medication" [index]="i" (remove)="removeMedication($event)">
+            </app-medication-card>
+            }
+        </div>
+    </div>
+    <button type="button" (click)="addMedication()">Add Medication</button>
+    <button type="submit" (click)="submitForm()">Submit</button>
+
+</form>
