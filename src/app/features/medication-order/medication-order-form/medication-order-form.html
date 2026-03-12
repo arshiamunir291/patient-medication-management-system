@@ -27,14 +27,15 @@
     </div>
     <div>
         <h4>Medications</h4>
+        <p>Medication added {{medications.length}}/10</p>
         <div formArrayName="medications">
             @for (medication of medications.controls; track $index; let i=$index) {
-            <app-medication-card [group]="medication" [index]="i" (remove)="removeMedication($event)">
+            <app-medication-card [group]="medication" [index]="i" (remove)="removeMedication($event)" [totalMedication]="medications.length">
             </app-medication-card>
             }
         </div>
     </div>
-    <button type="button" (click)="addMedication()">Add Medication</button>
+    <button type="button" (click)="addMedication()" [disabled]="medications.length ==10">Add Medication</button>
     <button type="submit" (click)="submitForm()">Submit</button>
 
 </form>

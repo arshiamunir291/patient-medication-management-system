@@ -1,6 +1,7 @@
 import { Injectable ,inject} from '@angular/core';
 import {Validators, NonNullableFormBuilder } from '@angular/forms';
 import { MedicationForm, MedicationOrderFormType } from '../../features/models/medication.model';
+import { dosageRangeValidator, requiredDiagnosisValidator } from '../validators/medication.validators';
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +17,8 @@ export class MedicationFormServices {
       }),
       prescribingInfo:this.fb.group({
         physician:this.fb.control({value:'',disabled:true}),
-        therapyType:['',Validators.required],
-        diagnosis:''
+        therapyType:['',Validators.required,requiredDiagnosisValidator],
+        diagnosis:['']
         
       }),
       medications:this.fb.array([this.createMedicationGroup()])
@@ -28,7 +29,7 @@ export class MedicationFormServices {
     return this.fb.group({
       drugName:['',Validators.required],
       dosage:this.fb.group({
-        value:[0,[Validators.required,Validators.min(0.1)]],
+        value:[0,[Validators.required,Validators.min(0.1),dosageRangeValidator]],
         unit:['mg',Validators.required]
       }),
       routes:['',Validators.required],

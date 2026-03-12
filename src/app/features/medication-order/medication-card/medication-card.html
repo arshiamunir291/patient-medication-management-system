@@ -2,6 +2,12 @@
     <h4>Medication {{index()+1}}</h4>
     <label>Drug Name</label>
     <input type="text" formControlName="drugName">
+    <input type="text" [formControl]="drugSearchControl" placeholder="Search Drug">
+    <ul>
+        @for (drug of filteredDrugs; track drug) {
+            <li (click)="selectDrug(drug)">{{drug}}</li>
+        }
+    </ul>
     <div formGroupName="dosage">
         <label>Dosage</label>
         <input type="number" formControlName="value">
@@ -27,5 +33,5 @@
     </select>
     <label>Instructions</label>
     <textarea formControlName="instructions"></textarea>
-    <button type="button" (click)="removeMedication()">Remove Medication</button>
+    <button type="button" (click)="removeMedication()" [disabled]="totalMedication() ==1">Remove Medication</button>
 </div>

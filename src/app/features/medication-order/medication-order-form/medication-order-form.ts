@@ -1,9 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { FormArray, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MedicationFormServices } from '../../../core/services/medication-form.services';
 import { MedicationForm, MedicationOrderFormType } from '../../models/medication.model';
 import { MedicationCard } from '../medication-card/medication-card';
 import { THERAPY_TYPES } from '../../constants/mock-data';
+
 
 
 @Component({
@@ -17,9 +18,11 @@ export class MedicationOrderForm implements OnInit {
   medications!:FormArray<MedicationForm>;
   formService = inject(MedicationFormServices);
   therapyTypes=THERAPY_TYPES;
+
   ngOnInit(): void {
     this.form=this.formService.createMedicationOrderForm();
     this.medications=this.form.controls.medications;
+ 
   }
   addMedication(){
     this.formService.addMedication(this.form);
