@@ -1,41 +1,53 @@
-<form [formGroup]="form">
-    <h2>Medication Order Form</h2>
-    <div>
-        <h4>Patient Info</h4>
-        <div formGroupName="patientInfo">
-            <label>Patient Id</label>
-            <input type="text" formControlName="patientId">
-            <label>Order Date</label>
-            <input type="date" formControlName="orderDate">
-        </div>
-    </div>
-    <div>
-        <h4>Prescribing Info</h4>
-        <div formGroupName="prescribingInfo">
-            <label>Physician</label>
-            <input type="text" formControlName="physician">
-            <label>Therapy Type</label>
-            <select formControlName="therapyType">
-                <option value="">Select Type</option>
-                @for (therapyType of therapyTypes; track therapyType) {
-                    <option [value]="therapyType">{{therapyType}}</option>
-                }
-            </select>
-            <label>Diagnosis</label>
-            <input type="text" formControlName="diagnosis">
-        </div>
-    </div>
-    <div>
-        <h4>Medications</h4>
-        <p>Medication added {{medications.length}}/10</p>
-        <div formArrayName="medications">
-            @for (medication of medications.controls; track $index; let i=$index) {
-            <app-medication-card [group]="medication" [index]="i" (remove)="removeMedication($event)" [totalMedication]="medications.length">
-            </app-medication-card>
-            }
-        </div>
-    </div>
-    <button type="button" (click)="addMedication()" [disabled]="medications.length ==10">Add Medication</button>
-    <button type="submit" (click)="submitForm()">Submit</button>
+<form [formGroup]="form" class="form">
+    <h1>Medication Order Form</h1>
+    <mat-card>
+        <mat-card-title>Patient Info</mat-card-title>
+        <mat-card-content formGroupName="patientInfo">
+            <mat-form-field appearance="outline">
+                <mat-label>Patient Id</mat-label>
+                <input matInput formControlName="patientId">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>Order Date</mat-label>
+                <input matInput type="date" formControlName="orderDate">
+            </mat-form-field>
 
+        </mat-card-content>
+    </mat-card>
+    <mat-card>
+        <mat-card-title>Prescribing Info</mat-card-title>
+        <mat-card-content formGroupName="prescribingInfo">
+            <mat-form-field appearance="outline">
+                <mat-label>Physician</mat-label>
+                <input matInput formControlName="physician">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>Therapy Type</mat-label>
+                <mat-select formControlName="therapyType">
+                    @for (therapyType of therapyTypes; track therapyType) {
+                    <mat-option [value]="therapyType">{{therapyType}}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>Diagnosis</mat-label>
+                <input matInput formControlName="diagnosis">
+            </mat-form-field>
+        </mat-card-content>
+    </mat-card>
+    <mat-card>
+        <mat-card-title>Medications</mat-card-title>
+        <mat-card-content>
+            <p>Medication added {{medications.length}}/10</p>
+            <div formArrayName="medications">
+                @for (medication of medications.controls; track $index; let i=$index) {
+                <app-medication-card [group]="medication" [index]="i" (remove)="removeMedication($event)"
+                    [totalMedication]="medications.length">
+                </app-medication-card>
+                }
+            </div><br>
+            <button mat-raised-button color="primary" type="button" (click)="addMedication()" [disabled]="medications.length ===10">Add Medication</button>
+        </mat-card-content>
+    </mat-card>
+    <button mat-raised-button color="accent" type="submit" (click)="submitForm()">Submit</button>
 </form>

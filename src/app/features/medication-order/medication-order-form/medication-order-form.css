@@ -1,0 +1,29 @@
+.form{
+    background-color:rgba(117, 178, 216, 0.432);
+    padding: 2%;
+    margin-top: 2%;
+    border-radius: 10px;
+    margin-bottom: 2%;
+}
+h1{
+    text-align: center;
+}
+mat-card{
+    margin-bottom: 2%;
+    padding: 2%;
+}
+mat-form-field{
+    margin-right: 2%;
+    width: 45%;
+}
+mat-card-title{
+    font-size: 20px;
+    font-weight: bold;
+    margin: 5px;
+}
+p{
+    font-size: 18px;
+    font-weight: bold;
+    text-align: end;
+}
+               

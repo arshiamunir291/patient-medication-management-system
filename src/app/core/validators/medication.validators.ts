@@ -1,4 +1,4 @@
-import { AbstractControl, ValidationErrors } from "@angular/forms";
+import { AbstractControl, FormArray, ValidationErrors } from "@angular/forms";
 
 
 export function dosageRangeValidator(control:AbstractControl):ValidationErrors|null{
@@ -23,4 +23,11 @@ export function dosageRangeValidator(control:AbstractControl):ValidationErrors|n
         return {requiredDiagnosis:true};
     }
     return null;
+ }
+
+ export function duplicateDrugValidator(control:AbstractControl):ValidationErrors|null{
+    const formArray=control as FormArray;
+    const drugName=formArray.controls.map(c=>c.get('drugName')?.value).filter(Boolean);
+    const duplicate=drugName.find((drug,index)=>drugName.indexOf(drug)!==index);
+    return duplicate?{duplicateDrug:{drugName:duplicate}}:null;
  }

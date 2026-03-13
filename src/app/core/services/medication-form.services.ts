@@ -1,7 +1,7 @@
-import { Injectable ,inject} from '@angular/core';
+import { Injectable,inject} from '@angular/core';
 import {Validators, NonNullableFormBuilder } from '@angular/forms';
 import { MedicationForm, MedicationOrderFormType } from '../../features/models/medication.model';
-import { dosageRangeValidator, requiredDiagnosisValidator } from '../validators/medication.validators';
+import { dosageRangeValidator, requiredDiagnosisValidator ,duplicateDrugValidator} from '../validators/medication.validators';
 
 @Injectable({
   providedIn: 'root',
@@ -16,12 +16,11 @@ export class MedicationFormServices {
         orderDate:['',Validators.required]
       }),
       prescribingInfo:this.fb.group({
-        physician:this.fb.control({value:'',disabled:true}),
-        therapyType:['',Validators.required,requiredDiagnosisValidator],
-        diagnosis:['']
-        
+        physician:[''],
+        therapyType:['',[Validators.required,requiredDiagnosisValidator]],
+        diagnosis:['']  
       }),
-      medications:this.fb.array([this.createMedicationGroup()])
+      medications:this.fb.array([this.createMedicationGroup()],duplicateDrugValidator)
     })
   };
   //Creation of Medication Array
@@ -29,12 +28,12 @@ export class MedicationFormServices {
     return this.fb.group({
       drugName:['',Validators.required],
       dosage:this.fb.group({
-        value:[0,[Validators.required,Validators.min(0.1),dosageRangeValidator]],
+        value:[0,dosageRangeValidator],
         unit:['mg',Validators.required]
       }),
       routes:['',Validators.required],
       frequency:['',Validators.required],
-      instructions:''
+      instructions:['']
     })
   };
   //Addition of new medication
