@@ -16,7 +16,7 @@ export type PatientInfoForm=FormGroup<{
     orderDate:FormControl<string>;
 }>;
 export type PrescribingInfoForm=FormGroup<{
-    physician:FormControl<string>;
+    physicians:FormControl<string>;
     diagnosis:FormControl<string>;
     therapyType:FormControl<string>;
 }>;

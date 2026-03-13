@@ -16,7 +16,7 @@ export class MedicationFormServices {
         orderDate:['',Validators.required]
       }),
       prescribingInfo:this.fb.group({
-        physician:[''],
+        physicians:[''],
         therapyType:['',[Validators.required,requiredDiagnosisValidator]],
         diagnosis:['']  
       }),
@@ -29,7 +29,7 @@ export class MedicationFormServices {
       drugName:['',Validators.required],
       dosage:this.fb.group({
         value:[0,dosageRangeValidator],
-        unit:['mg',Validators.required]
+        unit:['',Validators.required]
       }),
       routes:['',Validators.required],
       frequency:['',Validators.required],

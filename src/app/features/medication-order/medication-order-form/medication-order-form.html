@@ -19,7 +19,11 @@
         <mat-card-content formGroupName="prescribingInfo">
             <mat-form-field appearance="outline">
                 <mat-label>Physician</mat-label>
-                <input matInput formControlName="physician">
+                <mat-select formControlName="physicians">
+                    @for (physician of physicians; track physician) {
+                        <mat-option [value]="physician" >{{physician}}</mat-option>
+                    }
+                </mat-select>       
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label>Therapy Type</mat-label>
@@ -29,10 +33,13 @@
                     }
                 </mat-select>
             </mat-form-field>
+            @if (therapyTypeValue === "Chemotherapy") {
             <mat-form-field appearance="outline">
                 <mat-label>Diagnosis</mat-label>
                 <input matInput formControlName="diagnosis">
             </mat-form-field>
+            }
+
         </mat-card-content>
     </mat-card>
     <mat-card>
@@ -46,7 +53,8 @@
                 </app-medication-card>
                 }
             </div><br>
-            <button mat-raised-button color="primary" type="button" (click)="addMedication()" [disabled]="medications.length ===10">Add Medication</button>
+            <button mat-raised-button color="primary" type="button" (click)="addMedication()"
+                [disabled]="medications.length ===10">Add Medication</button>
         </mat-card-content>
     </mat-card>
     <button mat-raised-button color="accent" type="submit" (click)="submitForm()">Submit</button>

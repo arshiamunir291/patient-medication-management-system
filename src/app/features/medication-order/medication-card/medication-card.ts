@@ -10,9 +10,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatListModule } from '@angular/material/list';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 @Component({
   selector: 'app-medication-card',
-  imports: [ReactiveFormsModule,MatFormFieldModule,MatInputModule,MatSelectModule,MatButtonModule,MatCardModule,MatListModule],
+  imports: [ReactiveFormsModule,MatFormFieldModule,MatInputModule,MatSelectModule,MatButtonModule,MatCardModule,MatListModule,MatAutocompleteModule],
   templateUrl: './medication-card.html',
   styleUrl: './medication-card.css',
 })
@@ -32,9 +33,11 @@ export class MedicationCard implements OnInit {
     this.drugSearchControl.valueChanges.pipe(
       startWith(''),
       debounceTime(300),
-      distinctUntilChanged()
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(value => {
-      this.filteredDrugs = this.drugsName.filter(drug => drug.toLowerCase().includes(value?.toLowerCase() ?? ''));
+      const search=(value??'').toLocaleLowerCase();
+      this.filteredDrugs = this.drugsName.filter(drug => drug.toLowerCase().includes(search));
     });
     this.group().controls.routes.valueChanges.pipe(
       startWith(this.group().controls.routes.value),
@@ -66,7 +69,8 @@ export class MedicationCard implements OnInit {
   }
   selectDrug(drug: string) {
     this.group().controls.drugName.setValue(drug);
-    this.filteredDrugs = [];
+    this.drugSearchControl.setValue('',{emitEvent:false});
+    this.filteredDrugs=[];
   }
   removeMedication() {
     this.remove.emit(this.index());

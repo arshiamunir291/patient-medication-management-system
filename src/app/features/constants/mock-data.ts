@@ -8,6 +8,4 @@ export const DOSAGE_UNITS=['mg','mg/m²','mcg','mL']
 
 export const FREQUENCIES=['Once Daily','Twice Daily','Three Times Daily','Every 4 hours','Every 6 hours','Every 8 hours','As Needed']
 
-
-
-
+export const PHYSICIANS=['Dr. Smith','Dr. Oliver','Dr. Harry','Dr. Davis','Dr.Thomas','Dr. Oscar','Dayana']
