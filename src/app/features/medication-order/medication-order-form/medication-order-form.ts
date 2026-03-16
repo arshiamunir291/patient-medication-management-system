@@ -119,10 +119,10 @@ export class MedicationOrderForm implements OnInit {
     });
     const medicationArray = this.form.controls.medications;
     medicationArray.clear();
-    data.medications.array.forEach(() => {
+    data.medications.forEach(() => {
       this.formService.addMedication(this.form);
     });
-    medicationArray.patchValue(data.medication);
+    medicationArray.patchValue(data.medications);
     this.form.markAsPristine();
     this.lastSaved = new Date(draft.timestamp);
   }
@@ -161,7 +161,7 @@ export class MedicationOrderForm implements OnInit {
     data.medications.array.forEach(() => {
       this.formService.addMedication(this.form);
     });
-    medicationArray.patchValue(data.medication);
+    medicationArray.patchValue(data.medications);
     this.form.markAsPristine();
   }
   @HostListener('window:beforeunload', ['$event']) handleUnload(e: BeforeUnloadEvent) {
