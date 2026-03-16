@@ -23,14 +23,17 @@ export class MedicationFormServices {
       medications:this.fb.array([this.createMedicationGroup()],duplicateDrugValidator)
     })
   };
+  createDosageGroup(){
+    return this.fb.group({
+      value:[0,[Validators.required,dosageRangeValidator]],
+      unit:['',Validators.required]
+    })
+  };
   //Creation of Medication Array
   createMedicationGroup():MedicationForm{
     return this.fb.group({
       drugName:['',Validators.required],
-      dosage:this.fb.group({
-        value:[0,dosageRangeValidator],
-        unit:['',Validators.required]
-      }),
+      dosage:this.createDosageGroup(),
       routes:['',Validators.required],
       frequency:['',Validators.required],
       instructions:['']
@@ -50,5 +53,21 @@ export class MedicationFormServices {
       medication.removeAt(index);
     }
   };
+  populateFromExisting(form:FormGroup,data:any):void{
+    form.patchValue({
+      patientInfo:data.patientInfo,
+      prescribingInfo:data.prescribingInfo
+    });
+    const medication=form.get('medications')as FormArray;
+    medication.clear();
+    data.medications.forEach(()=>{
+      medication.push(this.createMedicationGroup());
+    });
+    medication.patchValue(data.medications);
+  }
+  validateForm(form:FormGroup):boolean{
+    form.markAllAsTouched();
+    return form.valid;
+  }
 }
   
