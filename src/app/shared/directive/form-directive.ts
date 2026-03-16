@@ -1,28 +1,38 @@
-import { Directive,ElementRef,OnInit,Renderer2,inject } from '@angular/core';
+import { Directive,ElementRef,OnInit,DestroyRef,inject } from '@angular/core';
 import { NgControl } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 @Directive({
   selector: '[appFormDirective]',
 })
 export class FormDirective implements OnInit {
+  private el=inject(ElementRef<HTMLElement>);
+  private ngControl=inject(NgControl,{optional:true});
+  private destroyRef=inject(DestroyRef);
+  ngOnInit(){
+    const control=this.ngControl?.control;
+    if(!control)return;
+    this.updateDirtyIndicator(control.dirty);
+    control.valueChanges?.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(()=>this.updateDirtyIndicator(control.dirty));
+  }
+  private updateDirtyIndicator(isDirty:boolean){
+    const field=this.el.nativeElement;
+    const formField = field.closest('mat-form-field');
+    if (!formField) return;
+const existing = formField.querySelector('.dirty-asterisk');
 
-  constructor(private control:NgControl,private el:ElementRef,private renderer:Renderer2) { }
+if (isDirty && !existing) {
+  const star = document.createElement('span');
+  star.classList.add('dirty-asterisk');
+  star.textContent = ' *';
+  star.style.color = 'red';
 
-ngOnInit(): void {
-  const matError=this.el.nativeElement.parentElement.queryselector('mat-error');
-  if(!matError)return;
-  this.control.control?.statusChanges.subscribe(()=>{
-    const control=this.control.control;
-    if(!control ||!(control.touched && control.invalid)){
-      this.renderer.setProperty(matError,'textContent','');
-      return;
-    }
-    const errors=control.errors;
-    let message='';
-    if(errors?.['required']){
-      message='This field is required';
-    }
-    // else if(errors?.['']){}
-  })
-
+  const label = formField.querySelector('mat-label');
+  label?.appendChild(star);
 }
+
+if (!isDirty && existing) {
+  existing.remove();
+}
+  }
 }
