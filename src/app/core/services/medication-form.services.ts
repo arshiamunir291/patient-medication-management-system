@@ -16,7 +16,7 @@ export class MedicationFormServices {
         orderDate:['',Validators.required]
       }),
       prescribingInfo:this.fb.group({
-        physicians:[''],
+        physicians:this.fb.control({value:'',disabled:true}),
         therapyType:['',[Validators.required,requiredDiagnosisValidator]],
         diagnosis:['']  
       }),

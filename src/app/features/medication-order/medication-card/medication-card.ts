@@ -1,4 +1,4 @@
-import { Component, input, OnInit, output,DestroyRef,inject } from '@angular/core';
+import { Component, input, OnInit, output, DestroyRef, inject } from '@angular/core';
 import { MedicationForm } from '../../models/medication.model';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FREQUENCIES, ROUTES, DOSAGE_UNITS, AVAILABLE_DRUGS, } from '../../constants/mock-data';
@@ -13,7 +13,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 @Component({
   selector: 'app-medication-card',
-  imports: [ReactiveFormsModule,MatFormFieldModule,MatInputModule,MatSelectModule,MatButtonModule,MatCardModule,MatListModule,MatAutocompleteModule],
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatCardModule, MatListModule, MatAutocompleteModule],
   templateUrl: './medication-card.html',
   styleUrl: './medication-card.css',
 })
@@ -28,7 +28,7 @@ export class MedicationCard implements OnInit {
   drugsName = AVAILABLE_DRUGS;
   filteredDrugs: string[] = [];
   drugSearchControl = new FormControl<string>('');
-  destroyRef=inject(DestroyRef);
+  destroyRef = inject(DestroyRef);
   ngOnInit(): void {
     this.drugSearchControl.valueChanges.pipe(
       startWith(''),
@@ -36,7 +36,7 @@ export class MedicationCard implements OnInit {
       distinctUntilChanged(),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(value => {
-      const search=(value??'').toLocaleLowerCase();
+      const search = (value ?? '').toLocaleLowerCase();
       this.filteredDrugs = this.drugsName.filter(drug => drug.toLowerCase().includes(search));
     });
     this.group().controls.routes.valueChanges.pipe(
@@ -66,11 +66,23 @@ export class MedicationCard implements OnInit {
           dosageControl.updateValueAndValidity();
           instructionControl.updateValueAndValidity();
         });
+    this.group().controls.drugName.valueChanges.pipe(
+      debounceTime(2000),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(value => {
+      if (!value) return;
+      const exists = this.drugsName.some(d => d.toLowerCase()===value.toLowerCase());
+      const control=this.group().controls.drugName;
+      exists?control.setErrors({drugExists:{name:value,id:'P-'+this.index()}}):control.setErrors(null);
+
+      
+    })
   }
   selectDrug(drug: string) {
     this.group().controls.drugName.setValue(drug);
-    this.drugSearchControl.setValue('',{emitEvent:false});
-    this.filteredDrugs=[];
+    this.drugSearchControl.setValue('', { emitEvent: false });
+    this.filteredDrugs = [];
   }
   removeMedication() {
     this.remove.emit(this.index());

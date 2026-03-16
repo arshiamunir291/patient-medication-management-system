@@ -1,11 +1,20 @@
-<form [formGroup]="form" class="form">
-    <h1>Medication Order Form</h1>
+<form [formGroup]="form" class="form">  
+<div class="form-header">
+  <h1>Medication Order Form</h1>
+  <span
+    matBadge="Unsaved Changes"
+    matBadgeColor="warn"
+    matBadgeSize="medium"
+    [matBadgeHidden]="!showUnsavedBadge">
+  </span>
+
+</div>
     <mat-card>
         <mat-card-title>Patient Info</mat-card-title>
         <mat-card-content formGroupName="patientInfo">
             <mat-form-field appearance="outline">
                 <mat-label>Patient Id</mat-label>
-                <input matInput formControlName="patientId">
+                <input matInput formControlName="patientId" >
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label>Order Date</mat-label>
@@ -21,9 +30,9 @@
                 <mat-label>Physician</mat-label>
                 <mat-select formControlName="physicians">
                     @for (physician of physicians; track physician) {
-                        <mat-option [value]="physician" >{{physician}}</mat-option>
+                    <mat-option [value]="physician">{{physician}}</mat-option>
                     }
-                </mat-select>       
+                </mat-select>
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label>Therapy Type</mat-label>
@@ -54,8 +63,17 @@
                 }
             </div><br>
             <button mat-raised-button color="primary" type="button" (click)="addMedication()"
-                [disabled]="medications.length ===10">Add Medication</button>
+                [disabled]="medications.length ===10 || form.invalid">Add Medication</button>
         </mat-card-content>
     </mat-card>
     <button mat-raised-button color="accent" type="submit" (click)="submitForm()">Submit</button>
+    <button mat-raised-button color="accent" type="button" (click)="restoreDraft()">Restore Draft</button>
+    @if(lastSaved){
+        <p>Last Saved:{{ lastSaved | date:'shortTime'}}</p>
+    }
+    <button mat-raised-button color="accent" type="button" (click)="toggleViewMode()">Toggle View Mode</button>
+    <button mat-raised-button color="accent" type="button" (click)="clearAll()">Clear All</button>
+    <button mat-raised-button color="accent" type="button" (click)="discardChanges()" [disabled]="!form.dirty">Discard Changes</button>
+    <!-- <button mat-raised-button color="accent" type="button"  (click)="editMode()">Edit Mode</button>
+    <button mat-raised-button color="accent" type="button" (click)="duplicateMode()">Duplicate Mode</button> -->
 </form>
