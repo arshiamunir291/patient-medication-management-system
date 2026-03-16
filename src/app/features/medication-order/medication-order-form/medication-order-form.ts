@@ -167,6 +167,7 @@ export class MedicationOrderForm implements OnInit {
   @HostListener('window:beforeunload', ['$event']) handleUnload(e: BeforeUnloadEvent) {
     if (this.form.dirty) {
       e.preventDefault();
+      e.returnValue='';
     }
   }
   editMode() {
