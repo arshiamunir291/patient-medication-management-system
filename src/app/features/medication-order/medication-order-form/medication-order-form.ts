@@ -158,7 +158,7 @@ export class MedicationOrderForm implements OnInit {
     });
     const medicationArray = this.form.controls.medications;
     medicationArray.clear();
-    data.medications.array.forEach(() => {
+    data.medications.forEach(() => {
       this.formService.addMedication(this.form);
     });
     medicationArray.patchValue(data.medications);
