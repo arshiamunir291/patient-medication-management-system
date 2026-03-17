@@ -14,11 +14,27 @@ import { MatCardModule } from '@angular/material/card';
 import { MatBadgeModule } from '@angular/material/badge';
 import { StorageService } from '../../../shared/utils/storage.service';
 import { DatePipe } from '@angular/common';
-
-
+import { FormDirective } from '../../../shared/directive/form-directive';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { isValidField, getErrorMessage } from '../../../shared/utils/form-utils';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 @Component({
   selector: 'app-medication-order-form',
-  imports: [ReactiveFormsModule, MedicationCard, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatCardModule, MatBadgeModule, DatePipe],
+  imports: [ReactiveFormsModule,
+    MedicationCard,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCardModule, MatBadgeModule,
+    DatePipe,
+    FormDirective,
+    MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+  ],
   templateUrl: './medication-order-form.html',
   styleUrl: './medication-order-form.css',
 })
@@ -36,7 +52,10 @@ export class MedicationOrderForm implements OnInit {
   lastSaved: Date | null = null;
   isViewMode = false;
   modifiedFields: string[] = [];
-
+  snackBar = inject(MatSnackBar);
+  isValid = isValidField;
+  errorMessage = getErrorMessage;
+  minDate=new Date();
   ngOnInit(): void {
     this.form = this.formService.createMedicationOrderForm();
     this.medications = this.form.controls.medications;
@@ -58,21 +77,22 @@ export class MedicationOrderForm implements OnInit {
     prescribing.controls.therapyType.valueChanges.pipe
       (startWith(prescribing.controls.therapyType.value), takeUntilDestroyed(this.destroyRef)).subscribe(
         therapy => {
-          this.therapyTypeValue = therapy;
           const diagnosisControl = prescribing.controls.diagnosis;
           const physicianControl = prescribing.controls.physicians;
           if (therapy) {
-            physicianControl.enable();
+            physicianControl.enable({ emitEvent: false });
           } else {
-            physicianControl.disable();
+            physicianControl.disable({ emitEvent: false });
           }
+          diagnosisControl.setErrors(null);
+          physicianControl.setErrors(null);
           if (therapy === "Chemotherapy") {
             diagnosisControl.setValidators([
               Validators.required
             ]);
             physicianControl.setValidators([
               Validators.required,
-              Validators.pattern(/^Dr\./)
+              Validators.pattern(/^Dr\.\s[A-Za-z]+$/)
             ])
           } else {
             diagnosisControl.clearValidators();
@@ -80,8 +100,8 @@ export class MedicationOrderForm implements OnInit {
               Validators.required
             ]);
           }
-          diagnosisControl.updateValueAndValidity();
-          physicianControl.updateValueAndValidity();
+          diagnosisControl.updateValueAndValidity({ emitEvent: false });
+          physicianControl.updateValueAndValidity({ emitEvent: false });
         }
       )
 
@@ -93,13 +113,21 @@ export class MedicationOrderForm implements OnInit {
     this.formService.removeMedication(this.form, index);
   }
   submitForm() {
+    this.form.markAllAsTouched();
+    if (this.form.invalid) {
+      this.showValidationSummary();
+      return;
+    }
     if (this.form.valid) {
       console.log(this.form.getRawValue());
       console.log(this.form.value)
       this.showUnsavedBadge = false;
       this.storageService.clearDraft(this.DRAFT_KEY);
-      this.form.reset();
-      this.form.markAsPristine();
+      this.snackBar.open(
+        'Medication order submitted successfully',
+        'Close',
+        { duration: 3000 }
+      )
     }
   }
   saveDraft() {
@@ -167,7 +195,7 @@ export class MedicationOrderForm implements OnInit {
   @HostListener('window:beforeunload', ['$event']) handleUnload(e: BeforeUnloadEvent) {
     if (this.form.dirty) {
       e.preventDefault();
-      e.returnValue='';
+      e.returnValue = '';
     }
   }
   editMode() {
@@ -202,8 +230,44 @@ export class MedicationOrderForm implements OnInit {
           }
         ]
       });
-    }catch(error){
-      console.error('setValue Error:Missing field!',error);
+    } catch (error) {
+      console.error('setValue Error:Missing field!', error);
     }
- }
+  }
+  showValidationSummary() {
+    const fields = [
+      ['patientInfo.patientId', 'Patient Id'],
+      ['patientInfo.orderDate', 'Order Date'],
+      ['prescribingInfo.physicians', 'Physician'],
+      ['prescribingInfo.therapyType', 'Therapy Type'],
+      ['prescribingInfo.diagnosis', 'Diagnosis'],
+    ];
+    const errors = fields.map(([path, label]) => {
+      const msg = this.errorMessage(this.form, path);
+      return msg ? `${label}:${msg}` : null;
+    }).filter(Boolean) as string[];
+
+    this.medications.controls.forEach((_, i) => {
+      const base = `edications.${i}`;
+      const medFields = [
+        ['drugName', 'Drug Name'],
+        ['dosage.value', 'Dosage'],
+        ['dosage.unit', 'Unit'],
+        ['routes', 'Route'],
+        ['frequency', 'Frequency'],
+        ['instructions', 'Instructions'],
+      ];
+      medFields.forEach((key, label) => {
+        const msg = this.errorMessage(this.form, `${base}.${key}`);
+        if (msg) errors.push(`Medication ${i + 1} - ${label}: ${msg}`);
+      });
+    });
+    if (errors.length) {
+      alert("Please fix the following errors:\n\n" + errors.join('\n'));
+    }
+  }
+  showValidationIcon(controlName: string) {
+    const control = this.form.get(controlName);
+    return control?.touched && control?.valid;
+  }
 }

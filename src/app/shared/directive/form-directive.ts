@@ -26,6 +26,7 @@ if (isDirty && !existing) {
   star.classList.add('dirty-asterisk');
   star.textContent = ' *';
   star.style.color = 'red';
+  star.style.fontSize='20px';
 
   const label = formField.querySelector('mat-label');
   label?.appendChild(star);

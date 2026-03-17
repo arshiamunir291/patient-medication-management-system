@@ -11,9 +11,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatListModule } from '@angular/material/list';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { FormDirective } from '../../../shared/directive/form-directive';
+import { isValidField } from '../../../shared/utils/form-utils';
+import { MatIconModule } from '@angular/material/icon';
+import { getErrorMessage } from '../../../shared/utils/form-utils';
 @Component({
   selector: 'app-medication-card',
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatCardModule, MatListModule, MatAutocompleteModule],
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatCardModule, MatListModule, MatAutocompleteModule,FormDirective,MatIconModule],
   templateUrl: './medication-card.html',
   styleUrl: './medication-card.css',
 })
@@ -29,6 +33,8 @@ export class MedicationCard implements OnInit {
   filteredDrugs: string[] = [];
   drugSearchControl = new FormControl<string>('');
   destroyRef = inject(DestroyRef);
+  isValid=isValidField;
+  errorMessage=getErrorMessage;
   ngOnInit(): void {
     this.drugSearchControl.valueChanges.pipe(
       startWith(''),

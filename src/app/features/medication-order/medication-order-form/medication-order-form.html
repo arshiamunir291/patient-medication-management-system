@@ -1,26 +1,36 @@
-<form [formGroup]="form" class="form">  
-<div class="form-header">
-  <h1>Medication Order Form</h1>
-  <span
-    matBadge="Unsaved Changes"
-    matBadgeColor="warn"
-    matBadgeSize="medium"
-    [matBadgeHidden]="!showUnsavedBadge">
-  </span>
+<form [formGroup]="form" class="form">
+    <div class="form-header">
+        <h1>Medication Order Form</h1>
+        <span matBadge="Unsaved Changes" matBadgeColor="warn" matBadgeSize="medium"
+            [matBadgeHidden]="!showUnsavedBadge">
+        </span>
 
-</div>
+    </div>
     <mat-card>
         <mat-card-title>Patient Info</mat-card-title>
         <mat-card-content formGroupName="patientInfo">
             <mat-form-field appearance="outline">
                 <mat-label>Patient Id</mat-label>
-                <input matInput formControlName="patientId" >
+                <input matInput formControlName="patientId" appFormDirective>
+                @if(isValid(form,'patientInfo.patientId')){
+                <mat-icon matSuffix>check_circle</mat-icon>
+                }
+                @if(errorMessage(form,'patientInfo.patientId'); as error){
+                <mat-error>{{error}}</mat-error>
+                }
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label>Order Date</mat-label>
-                <input matInput type="date" formControlName="orderDate">
+                <input matInput [matDatepicker]="picker" [min]="minDate" formControlName="orderDate" appFormDirective>
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                @if(isValid(form,'patientInfo.orderDate')){
+                <mat-icon matSuffix>check_circle</mat-icon>
+                }
+                @if(errorMessage(form,'patientInfo.orderDate'); as error){
+                <mat-error>{{error}}</mat-error>
+                }
             </mat-form-field>
-
         </mat-card-content>
     </mat-card>
     <mat-card>
@@ -28,27 +38,44 @@
         <mat-card-content formGroupName="prescribingInfo">
             <mat-form-field appearance="outline">
                 <mat-label>Physician</mat-label>
-                <mat-select formControlName="physicians">
+                <mat-select formControlName="physicians" appFormDirective>
                     @for (physician of physicians; track physician) {
                     <mat-option [value]="physician">{{physician}}</mat-option>
                     }
                 </mat-select>
+                @if(isValid(form,'prescribingInfo.physicians')){
+                <mat-icon matSuffix>check_circle</mat-icon>
+                }
+                @if(errorMessage(form,'prescribingInfo.physicians'); as error){
+                <mat-error>{{error}}</mat-error>
+                }
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label>Therapy Type</mat-label>
-                <mat-select formControlName="therapyType">
+                <mat-select formControlName="therapyType" appFormDirective>
                     @for (therapyType of therapyTypes; track therapyType) {
                     <mat-option [value]="therapyType">{{therapyType}}</mat-option>
                     }
                 </mat-select>
+                @if(isValid(form,'prescribingInfo.therapyType')){
+                <mat-icon matSuffix>check_circle</mat-icon>
+                }
+                @if(errorMessage(form,'prescribingInfo.therapyType'); as error){
+                <mat-error>{{error}}</mat-error>
+                }
             </mat-form-field>
-            @if (therapyTypeValue === "Chemotherapy") {
+            @if (form.get('prescribingInfo.therapyType')?.value === "Chemotherapy") {
             <mat-form-field appearance="outline">
                 <mat-label>Diagnosis</mat-label>
-                <input matInput formControlName="diagnosis">
+                <input matInput formControlName="diagnosis" appFormDirective>
+                @if(isValid(form,'prescribingInfo.diagnosis')){
+                <mat-icon matSuffix>check_circle</mat-icon>
+                }
+                @if(errorMessage(form,'prescribingInfo.diagnosis'); as error){
+                <mat-error>{{error}}</mat-error>
+                }
             </mat-form-field>
             }
-
         </mat-card-content>
     </mat-card>
     <mat-card>
@@ -68,12 +95,12 @@
     </mat-card>
     <button mat-raised-button color="accent" type="submit" (click)="submitForm()">Submit</button>
     <button mat-raised-button color="accent" type="button" (click)="restoreDraft()">Restore Draft</button>
-    @if(lastSaved){
-        <p>Last Saved:{{ lastSaved | date:'shortTime'}}</p>
-    }
     <button mat-raised-button color="accent" type="button" (click)="toggleViewMode()">Toggle View Mode</button>
     <button mat-raised-button color="accent" type="button" (click)="clearAll()">Clear All</button>
     <button mat-raised-button color="accent" type="button" (click)="discardChanges()" [disabled]="!form.dirty">Discard Changes</button>
+    @if(lastSaved){
+    <p>Last Saved:{{ lastSaved | date:'shortTime'}}</p>
+    }
     <!-- <button mat-raised-button color="accent" type="button"  (click)="editMode()">Edit Mode</button>
     <button mat-raised-button color="accent" type="button" (click)="duplicateMode()">Duplicate Mode</button> -->
 </form>
