@@ -1,11 +1,18 @@
 <form [formGroup]="form" class="form">
-    <div class="form-header">
-        <h1>Medication Order Form</h1>
-        <span matBadge="Unsaved Changes" matBadgeColor="warn" matBadgeSize="medium"
-            [matBadgeHidden]="!showUnsavedBadge">
-        </span>
+    <header>
+        <div class="form-header">
+            <h1>Medication Order Form</h1>
+            <span matBadge="Unsaved Changes" matBadgeColor="warn" matBadgeSize="medium"
+                [matBadgeHidden]="!showUnsavedBadge">
+            </span>
 
-    </div>
+        </div>
+        <div>
+            <p class="sub-title">PatientId: {{form.get('patientInfo.patientId')?.value || 'N/A'}} |
+                Order Date: {{form.get('patientInfo.orderDate')?.value || 'N/A'}}</p>
+        </div>
+    </header>
+
     <mat-card>
         <mat-card-title>Patient Info</mat-card-title>
         <mat-card-content formGroupName="patientInfo">
@@ -93,14 +100,21 @@
                 [disabled]="medications.length ===10 || form.invalid">Add Medication</button>
         </mat-card-content>
     </mat-card>
-    <button mat-raised-button color="accent" type="submit" (click)="submitForm()">Submit</button>
-    <button mat-raised-button color="accent" type="button" (click)="restoreDraft()">Restore Draft</button>
-    <button mat-raised-button color="accent" type="button" (click)="toggleViewMode()">Toggle View Mode</button>
-    <button mat-raised-button color="accent" type="button" (click)="clearAll()">Clear All</button>
-    <button mat-raised-button color="accent" type="button" (click)="discardChanges()" [disabled]="!form.dirty">Discard Changes</button>
-    @if(lastSaved){
-    <p>Last Saved:{{ lastSaved | date:'shortTime'}}</p>
-    }
-    <!-- <button mat-raised-button color="accent" type="button"  (click)="editMode()">Edit Mode</button>
+    <footer>
+        <button mat-raised-button color="accent" type="submit" (click)="submitForm()"
+            [disabled]="form.invalid">Submit</button>
+        <button mat-raised-button color="accent" type="button" (click)="saveDraft()">Save Draft</button>
+        <button mat-raised-button color="accent" type="button" (click)="restoreDraft()">Restore Draft</button>
+        <button mat-raised-button color="accent" type="button" (click)="toggleViewMode()">Toggle View Mode</button>
+        <button mat-raised-button color="accent" type="button" (click)="clearAll()">Clear All</button>
+        <button mat-raised-button color="accent" type="button" (click)="discardChanges()"
+            [disabled]="!form.dirty">Discard
+            Changes</button>
+        @if(lastSaved){
+        <p>Last Saved:{{ lastSaved | date:'shortTime'}}</p>
+        }
+        <!-- <button mat-raised-button color="accent" type="button"  (click)="editMode()">Edit Mode</button>
     <button mat-raised-button color="accent" type="button" (click)="duplicateMode()">Duplicate Mode</button> -->
+    </footer>
+
 </form>

@@ -17,7 +17,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { getErrorMessage } from '../../../shared/utils/form-utils';
 @Component({
   selector: 'app-medication-card',
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatCardModule, MatListModule, MatAutocompleteModule,FormDirective,MatIconModule],
+  imports: [ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCardModule, MatListModule,
+    MatAutocompleteModule, FormDirective,
+    MatIconModule],
   templateUrl: './medication-card.html',
   styleUrl: './medication-card.css',
 })
@@ -33,8 +40,8 @@ export class MedicationCard implements OnInit {
   filteredDrugs: string[] = [];
   drugSearchControl = new FormControl<string>('');
   destroyRef = inject(DestroyRef);
-  isValid=isValidField;
-  errorMessage=getErrorMessage;
+  isValid = isValidField;
+  errorMessage = getErrorMessage;
   ngOnInit(): void {
     this.drugSearchControl.valueChanges.pipe(
       startWith(''),
@@ -45,45 +52,7 @@ export class MedicationCard implements OnInit {
       const search = (value ?? '').toLocaleLowerCase();
       this.filteredDrugs = this.drugsName.filter(drug => drug.toLowerCase().includes(search));
     });
-    this.group().controls.routes.valueChanges.pipe(
-      startWith(this.group().controls.routes.value),
-      takeUntilDestroyed(this.destroyRef)).subscribe(
-        route => {
-          const dosageControl = this.group().controls.dosage.controls.value;
-          const instructionControl = this.group().controls.instructions;
-          if (route === 'IV') {
-            dosageControl.setValidators([
-              Validators.required,
-              Validators.min(0.1)
-            ]);
-            instructionControl.setValidators([
-              Validators.required,
-              Validators.minLength(20)
-            ]);
-          }
-          else {
-            dosageControl.setValidators([
-              Validators.required,
-              Validators.min(1)
-            ]);
-            instructionControl.clearValidators();
 
-          }
-          dosageControl.updateValueAndValidity();
-          instructionControl.updateValueAndValidity();
-        });
-    this.group().controls.drugName.valueChanges.pipe(
-      debounceTime(2000),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(value => {
-      if (!value) return;
-      const exists = this.drugsName.some(d => d.toLowerCase()===value.toLowerCase());
-      const control=this.group().controls.drugName;
-      exists?control.setErrors({drugExists:{name:value,id:'P-'+this.index()}}):control.setErrors(null);
-
-      
-    })
   }
   selectDrug(drug: string) {
     this.group().controls.drugName.setValue(drug);

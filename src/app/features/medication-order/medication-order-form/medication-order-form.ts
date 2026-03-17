@@ -3,8 +3,8 @@ import { FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MedicationFormServices } from '../../../core/services/medication-form.services';
 import { MedicationForm, MedicationOrderFormType } from '../../models/medication.model';
 import { MedicationCard } from '../medication-card/medication-card';
-import { THERAPY_TYPES, PHYSICIANS } from '../../constants/mock-data';
-import { startWith, debounceTime, filter, tap, take } from 'rxjs';
+import { THERAPY_TYPES, PHYSICIANS, AVAILABLE_DRUGS } from '../../constants/mock-data';
+import { debounceTime, filter, tap, take } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -55,17 +55,19 @@ export class MedicationOrderForm implements OnInit {
   snackBar = inject(MatSnackBar);
   isValid = isValidField;
   errorMessage = getErrorMessage;
-  minDate=new Date();
+  minDate = new Date();
+  availableDrugs = AVAILABLE_DRUGS;
+
   ngOnInit(): void {
     this.form = this.formService.createMedicationOrderForm();
-    this.medications = this.form.controls.medications;
-    const prescribing = this.form.controls.prescribingInfo;
+    this.medications=this.form.controls.medications;
+    this.formService.setDrugs(this.availableDrugs);
+    this.formService.initializeForm(this.form);
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       console.log('Form Valid:', this.form.valid);
       this.showUnsavedBadge = this.form.dirty;
       this.modifiedFields = (Object.keys(this.form.controls) as (keyof typeof this.form.controls)[]).filter(key => this.form.controls[key].dirty);
       console.log('Modified FIelds:', this.modifiedFields);
-
     })
     this.form.valueChanges.pipe(
       debounceTime(5000),
@@ -74,37 +76,6 @@ export class MedicationOrderForm implements OnInit {
         this.saveDraft();
       }),
       takeUntilDestroyed(this.destroyRef)).subscribe();
-    prescribing.controls.therapyType.valueChanges.pipe
-      (startWith(prescribing.controls.therapyType.value), takeUntilDestroyed(this.destroyRef)).subscribe(
-        therapy => {
-          const diagnosisControl = prescribing.controls.diagnosis;
-          const physicianControl = prescribing.controls.physicians;
-          if (therapy) {
-            physicianControl.enable({ emitEvent: false });
-          } else {
-            physicianControl.disable({ emitEvent: false });
-          }
-          diagnosisControl.setErrors(null);
-          physicianControl.setErrors(null);
-          if (therapy === "Chemotherapy") {
-            diagnosisControl.setValidators([
-              Validators.required
-            ]);
-            physicianControl.setValidators([
-              Validators.required,
-              Validators.pattern(/^Dr\.\s[A-Za-z]+$/)
-            ])
-          } else {
-            diagnosisControl.clearValidators();
-            physicianControl.setValidators([
-              Validators.required
-            ]);
-          }
-          diagnosisControl.updateValueAndValidity({ emitEvent: false });
-          physicianControl.updateValueAndValidity({ emitEvent: false });
-        }
-      )
-
   }
   addMedication() {
     this.formService.addMedication(this.form);
