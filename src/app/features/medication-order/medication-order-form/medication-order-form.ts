@@ -1,10 +1,10 @@
 import { Component, OnInit, inject, DestroyRef, HostListener } from '@angular/core';
-import { FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, ReactiveFormsModule } from '@angular/forms';
 import { MedicationFormServices } from '../../../core/services/medication-form.services';
 import { MedicationForm, MedicationOrderFormType } from '../../models/medication.model';
 import { MedicationCard } from '../medication-card/medication-card';
 import { THERAPY_TYPES, PHYSICIANS, AVAILABLE_DRUGS } from '../../constants/mock-data';
-import { debounceTime, filter, tap, take } from 'rxjs';
+import { debounceTime, filter, tap} from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -46,7 +46,6 @@ export class MedicationOrderForm implements OnInit {
   therapyTypes = THERAPY_TYPES;
   physicians = PHYSICIANS;
   destroyRef = inject(DestroyRef);
-  therapyTypeValue: string | null = null;
   showUnsavedBadge = false;
   private readonly DRAFT_KEY = 'medication-order-draft';
   lastSaved: Date | null = null;
@@ -170,7 +169,7 @@ export class MedicationOrderForm implements OnInit {
   @HostListener('window:beforeunload', ['$event']) handleUnload(e: BeforeUnloadEvent) {
     if (this.form.dirty) {
       e.preventDefault();
-      e.returnValue = '';
+       e.returnValue = '';
     }
   }
   editMode() {
@@ -232,7 +231,7 @@ export class MedicationOrderForm implements OnInit {
         ['frequency', 'Frequency'],
         ['instructions', 'Instructions'],
       ];
-      medFields.forEach((key, label) => {
+      medFields.forEach(([key, label]) => {
         const msg = this.errorMessage(this.form, `${base}.${key}`);
         if (msg) errors.push(`Medication ${i + 1} - ${label}: ${msg}`);
       });

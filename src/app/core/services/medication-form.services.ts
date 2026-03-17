@@ -21,11 +21,11 @@ export class MedicationFormServices {
       }),
       prescribingInfo: this.fb.group({
         physicians: this.fb.control({ value: '', disabled: true }),
-        therapyType: ['', [Validators.required, requiredDiagnosisValidator]],
+        therapyType: ['', Validators.required],
         diagnosis: ['']
-      }),
+      },{validators: requiredDiagnosisValidator}),
       medications: this.fb.array([this.createMedicationGroup()], duplicateDrugValidator)
-    })
+    });
   };
   createDosageGroup() {
     return this.fb.group({
@@ -58,9 +58,6 @@ export class MedicationFormServices {
     const medication = form.controls.medications;
     if (medication.length > 1) {
       medication.removeAt(index);
-      medication.controls.forEach((med,i)=>{
-        this.setupDrugValidation(med,i);
-      })
     }
   };
   populateFromExisting(form: FormGroup, data: any): void {
@@ -156,8 +153,16 @@ export class MedicationFormServices {
     ).subscribe(value => {
       if (!value) return;
       const exists = this.drugs.some(d => d.toLowerCase() === value.toLowerCase());
-      const control = medication.controls.drugName;
-      exists ? control.setErrors({ drugExists: { name: value, id: 'P-' + index } }) : control.setErrors(null);
+      const errors=control.errors || {};
+      if(exists){
+        control.setErrors({
+          ...errors, drugExists:{name:value,id:'P-' + index}
+        })
+      }else{
+        delete errors['drugExists'];
+        control.setErrors(Object.keys(errors).length?errors:null);
+      }
+    
     })
   }
   setupMedicationLogic(medication:MedicationForm,index:number){
