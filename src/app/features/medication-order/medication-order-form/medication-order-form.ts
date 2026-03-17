@@ -118,8 +118,10 @@ export class MedicationOrderForm implements OnInit {
     });
     const medicationArray = this.form.controls.medications;
     medicationArray.clear();
-    data.medications.forEach(() => {
-      this.formService.addMedication(this.form);
+    data.medications.forEach((_:any,index:number) => {
+      const med=this.formService.createMedicationGroup();
+      this.formService.setupMedicationLogic(med,index);
+      medicationArray.push(med);
     });
     medicationArray.patchValue(data.medications);
     this.form.markAsPristine();
@@ -157,8 +159,10 @@ export class MedicationOrderForm implements OnInit {
     });
     const medicationArray = this.form.controls.medications;
     medicationArray.clear();
-    data.medications.forEach(() => {
-      this.formService.addMedication(this.form);
+    data.medications.forEach((_:any,index:number) => {
+      const med=this.formService.createMedicationGroup();
+      this.formService.setupMedicationLogic(med,index);
+      medicationArray.push(med);
     });
     medicationArray.patchValue(data.medications);
     this.form.markAsPristine();
@@ -219,7 +223,7 @@ export class MedicationOrderForm implements OnInit {
     }).filter(Boolean) as string[];
 
     this.medications.controls.forEach((_, i) => {
-      const base = `edications.${i}`;
+      const base = `medications.${i}`;
       const medFields = [
         ['drugName', 'Drug Name'],
         ['dosage.value', 'Dosage'],

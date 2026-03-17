@@ -45,6 +45,10 @@ export class MedicationFormServices {
   };
   //Addition of new medication
   addMedication(form: MedicationOrderFormType) {
+    const medications=form.controls.medications;
+    if(medications.length>=10){
+      return;
+    }
     const medication = this.createMedicationGroup();
     this.setupMedicationLogic(medication,form.controls.medications.length);
     form.controls.medications.push(medication);
@@ -54,6 +58,9 @@ export class MedicationFormServices {
     const medication = form.controls.medications;
     if (medication.length > 1) {
       medication.removeAt(index);
+      medication.controls.forEach((med,i)=>{
+        this.setupDrugValidation(med,i);
+      })
     }
   };
   populateFromExisting(form: FormGroup, data: any): void {
@@ -63,8 +70,10 @@ export class MedicationFormServices {
     });
     const medication = form.get('medications') as FormArray;
     medication.clear();
-    data.medications.forEach(() => {
-      medication.push(this.createMedicationGroup());
+    data.medications.forEach((_:any,index:number) => {
+      const med=this.createMedicationGroup();
+      this.setupMedicationLogic(med,index);
+      medication.push(med);
     });
     medication.patchValue(data.medications);
   }
@@ -139,7 +148,8 @@ export class MedicationFormServices {
         });
   }
   setupDrugValidation(medication:MedicationForm,index:number){
-    medication.controls.drugName.valueChanges.pipe(
+    const control=medication.controls.drugName;
+    control.valueChanges.pipe(
       debounceTime(2000),
       distinctUntilChanged(),
       takeUntilDestroyed(this.destroyRef)
