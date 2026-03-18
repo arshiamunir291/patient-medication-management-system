@@ -1,59 +1,174 @@
-# PatientMedicationManagementSystem
+Reactive Forms Concepts Implemented
+1. FormArray=>Used to manage dynamic medication list
+        Supports add/remove operations
+        Enforces min (1) and max (10) constraints 
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.5.
+2. Nested FormGroups=>Deeply nested structure (3+ levels):
+        patientInfo
+        prescribingInfo
+        medications → dosage
 
-## Development server
+3. Custom Validators
 
-To start a local development server, run:
+    i. dosageRangeValidator
+    ii. requiredDiagnosisValidator
+    iii. duplicateDrugValidator
 
-```bash
-ng serve
-```
+4. Dynamic Conditional Validation
+    Validators change based on:
+        i. therapyType
+        ii. route
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+5. RxJS Integration
+    Used for:
+        Drug search
+        Auto-save
+        Form monitoring
 
-## Code scaffolding
+6. Form State Management
+    Tracks:
+        dirty/pristine
+        touched/untouched
+        Enables/disables controls dynamically
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+7. Service-Based Architecture
+    All form logic handled in MedicationFormService
 
-```bash
-ng generate component component-name
-```
+8. Advanced Techniques
+    patchValue
+    setValue
+    getRawValue
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+FormArray Implementation:
+    FormArray holds multiple medication FormGroups
+    Each medication is dynamically created using service
+    i. Add Medication
+            addMedication(form: FormGroup) {
+                const medications = form.get('medications') as FormArray;
+                if (medications.length < 10) {
+                    const med = this.createMedicationGroup();
+                    medications.push(med);
+                }
+            }
+    ii.Remove Medication
+            removeMedication(form: FormGroup, index: number) {
+                const medications = form.get('medications') as FormArray;
+                if (medications.length > 1) {
+                    medications.removeAt(index);
+                }
+            }
+iii. patchValue vs setValue
+    patchValue=>Used when restoring draft or editing partial data
+                Updates only provided fields
+                form.patchValue(data);
+iv. setValue=>Used when duplicating full form
+                Requires all fields
+                form.setValue(fullData);
+                patchValue → flexibility
+                setValue → strict structure validation
 
-```bash
-ng generate --help
-```
+v. Conditional Validation
+        Route-Based Validation
+            IF route = 'IV':
+                dosage ≥ 0.1
+                instructions required (min 20 chars)
+            ELSE:
+                dosage ≥ 1
+                instructions optional
 
-## Building
+vi. Therapy Type Validation
+        IF therapyType = 'Chemotherapy':
+            diagnosis required
+            physician must include "Dr."
+        ELSE:
+            diagnosis optional
+                control.valueChanges.subscribe(value => {
+                    if (value === 'IV') {
+                        dosage.setValidators([Validators.required, Validators.min(0.1)]);
+                    } else {
+                        dosage.setValidators([Validators.required, Validators.min(1)]);
+                    }
+                dosage.updateValueAndValidity();
+                });
+3: RxJS Operators Used
+        Operator	            Purpose
+        debounceTime(300)	    Delay drug search
+        distinctUntilChanged	Prevent duplicate emissions
+        startWith('')	        Initialize search
+        debounceTime(5000)	    Auto-save delay
+        Example:
+                this.drugSearchControl.valueChanges.pipe(
+                debounceTime(300),
+                distinctUntilChanged(),
+                startWith('')
+                ).subscribe(value => {
+                // filter drugs
+                });
+4. Auto-Save Draft Feature
+    Saves form when:
+        form is dirty
+        form is valid
+        Uses localStorage
+        Debounced by 5 seconds
 
-To build the project run:
+this.form.valueChanges.pipe(
+  debounceTime(5000)
+).subscribe(() => {
+  if (this.form.valid && this.form.dirty) {
+    localStorage.setItem('draft', JSON.stringify(this.form.getRawValue()));
+  }
+});
+ Custom Validators
+Dosage Range Validator
+if (value < 0.1 || value > 5000) {
+  return { dosageRange: { min: 0.1, max: 5000, actual: value } };
+}
+Required Diagnosis Validator
+if (therapyType === 'Chemotherapy' && !diagnosis) {
+  return { requiredDiagnosis: true };
+}
+Duplicate Drug Validator
+const duplicate = names.find((drug, i) => names.indexOf(drug) !== i);
+return duplicate ? { duplicateDrug: { drugName: duplicate } } : null
 
-```bash
-ng build
-```
+Form State Management
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Physician disabled until therapyType selected
+View-only mode disables entire form
+Add button disabled when invalid
+Reset Strategies
+Clear All
+form.reset(defaultValues);
+Restore Draft
+form.patchValue(savedData);
+Discard Changes
+form.reset(lastSavedData);
+form.markAsPristine();
+ getRawValue() Usage
+form.value → excludes disabled controls
+form.getRawValue() → includes all controls   
+console.log(this.form.value);
+console.log(this.form.getRawValue());
+Custom Error Handling
 
-## Running unit tests
+Simulated API check:
+setTimeout(() => {
+  control.setErrors({
+    drugExists: {}
+  });
+}, 2000);
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Validation UI/UX
+Errors shown only when:
+touched && invalid
+Red border for invalid fields
+Green check for valid fields
+Character counter for instructions
 
-```bash
-ng test
-```
+Required fields marked with *
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Submit Logic:
+Disabled when form invalid
+Marks all fields touched on submit
+Shows validation summary
+Displays success message
