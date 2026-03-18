@@ -9,10 +9,9 @@
         </div>
         <div>
             <p class="sub-title">PatientId: {{form.get('patientInfo.patientId')?.value || 'N/A'}} |
-                Order Date: {{form.get('patientInfo.orderDate')?.value || 'N/A'}}</p>
+               Order Date:{{form.get('patientInfo.orderDate')?.value?(form.get('patientInfo.orderDate')?.value | date:'short'):'N/A'}} </p>
         </div>
     </header>
-
     <mat-card>
         <mat-card-title>Patient Info</mat-card-title>
         <mat-card-content formGroupName="patientInfo">

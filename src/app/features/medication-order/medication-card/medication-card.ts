@@ -43,6 +43,7 @@ export class MedicationCard implements OnInit {
   isValid = isValidField;
   errorMessage = getErrorMessage;
   ngOnInit(): void {
+    // for autocompelte search field
     this.drugSearchControl.valueChanges.pipe(
       startWith(''),
       debounceTime(300),
@@ -54,11 +55,13 @@ export class MedicationCard implements OnInit {
     });
 
   }
+  //select filtered drug
   selectDrug(drug: string) {
     this.group().controls.drugName.setValue(drug);
     this.drugSearchControl.setValue('', { emitEvent: false });
     this.filteredDrugs = [];
   }
+  //remove medication
   removeMedication() {
     this.remove.emit(this.index());
   }

@@ -1,28 +1,25 @@
 <mat-card [formGroup]="group()">
     <mat-card-title>Medication {{index()+1}}</mat-card-title>
     <mat-card-content>
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" class="drugSearch">
             <mat-label>Drug Name</mat-label>
-            <input matInput formControlName="drugName" appFormDirective>
+            <input  matInput formControlName="drugName" [matAutocomplete]="drugAuto" (focus)="filteredDrugs = drugsName" placeholder="Start typing drug name"
+                appFormDirective>
             @if(isValid(group(),'drugName')){
             <mat-icon matSuffix>check_circle</mat-icon>
             }
             @if(errorMessage(group(),'drugName'); as error){
             <mat-error>{{error}}</mat-error>
             }
+            <mat-autocomplete #drugAuto="matAutocomplete" (optionSelected)="selectDrug($event.option.value)">
+                @for (drug of filteredDrugs; track drug) {
+                <mat-option [value]="drug">
+                    {{drug}}
+                </mat-option>
+                }
+            </mat-autocomplete>
         </mat-form-field>
-        <mat-form-field appearance="outline">
-            <mat-label>Search Drug</mat-label>
-            <input matInput [formControl]="drugSearchControl" [matAutocomplete]="drugAuto"
-                (focus)="filteredDrugs = drugsName">
-        </mat-form-field>
-        <mat-autocomplete #drugAuto="matAutocomplete" (optionSelected)="selectDrug($event.option.value)">
-            @for (drug of filteredDrugs; track drug) {
-            <mat-option [value]="drug">
-                {{drug}}
-            </mat-option>
-            }
-        </mat-autocomplete>
+
         <div formGroupName="dosage">
             <mat-form-field appearance="outline">
                 <mat-label>Dosage</mat-label>

@@ -1,5 +1,5 @@
 import { FormArray,FormControl,FormGroup } from "@angular/forms";
-
+//form model that descibe the data type of evry field
 export type DosageForm=FormGroup<{
     value:FormControl<number>;
     unit:FormControl<string>;

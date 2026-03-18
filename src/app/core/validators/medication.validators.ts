@@ -1,6 +1,6 @@
 import { AbstractControl, FormArray, ValidationErrors } from "@angular/forms";
 
-
+//Dosage Range Validator
 export function dosageRangeValidator(control:AbstractControl):ValidationErrors|null{
     const value=control.value;
     if(value == null) return null;
@@ -15,6 +15,7 @@ export function dosageRangeValidator(control:AbstractControl):ValidationErrors|n
     }
     return null;
 };
+//diagnosed Validator
  export function requiredDiagnosisValidator(therapyTypeControl:AbstractControl):ValidationErrors | null{
     if(!therapyTypeControl.parent) return null;
     const therapyType=therapyTypeControl.value;
@@ -24,7 +25,7 @@ export function dosageRangeValidator(control:AbstractControl):ValidationErrors|n
     }
     return null;
  }
-
+ // duplicate drug Validator
  export function duplicateDrugValidator(control:AbstractControl):ValidationErrors|null{
     const formArray=control as FormArray;
     const drugName=formArray.controls.map(c=>c.get('drugName')?.value).filter(Boolean);

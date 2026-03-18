@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, DestroyRef, HostListener } from '@angular/core';
-import { FormArray, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MedicationFormServices } from '../../../core/services/medication-form.services';
 import { MedicationForm, MedicationOrderFormType } from '../../models/medication.model';
 import { MedicationCard } from '../medication-card/medication-card';
@@ -62,12 +62,14 @@ export class MedicationOrderForm implements OnInit {
     this.medications=this.form.controls.medications;
     this.formService.setDrugs(this.availableDrugs);
     this.formService.initializeForm(this.form);
+    //to show the modified fields
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       console.log('Form Valid:', this.form.valid);
       this.showUnsavedBadge = this.form.dirty;
       this.modifiedFields = (Object.keys(this.form.controls) as (keyof typeof this.form.controls)[]).filter(key => this.form.controls[key].dirty);
       console.log('Modified FIelds:', this.modifiedFields);
     })
+    // for auto saving draft
     this.form.valueChanges.pipe(
       debounceTime(5000),
       filter(() => this.form.valid && this.form.dirty),
@@ -76,30 +78,31 @@ export class MedicationOrderForm implements OnInit {
       }),
       takeUntilDestroyed(this.destroyRef)).subscribe();
   }
+  //add medication in form
   addMedication() {
     this.formService.addMedication(this.form);
   }
+  //remove medication
   removeMedication(index: number) {
     this.formService.removeMedication(this.form, index);
   }
-  submitForm() {
+  //submit button logic
+submitForm() {
+ if (!this.formService.validateForm(this.form)) {
     this.form.markAllAsTouched();
-    if (this.form.invalid) {
-      this.showValidationSummary();
-      return;
-    }
-    if (this.form.valid) {
-      console.log(this.form.getRawValue());
-      console.log(this.form.value)
-      this.showUnsavedBadge = false;
-      this.storageService.clearDraft(this.DRAFT_KEY);
-      this.snackBar.open(
-        'Medication order submitted successfully',
-        'Close',
-        { duration: 3000 }
-      )
-    }
+    this.showValidationSummary();
+    return;
   }
+  this.form.reset();
+  this.form.markAsUntouched();
+  // Log submitted data
+  console.log(this.form.getRawValue());
+  console.log(this.form.value);
+  this.showUnsavedBadge = false;
+  this.storageService.clearDraft(this.DRAFT_KEY);
+
+  this.snackBar.open('Medication order submitted successfully', 'Close', { duration: 3000 });
+} //save the draft
   saveDraft() {
     const formData = this.form.getRawValue();
     this.storageService.saveDraft(this.DRAFT_KEY, formData);
@@ -107,6 +110,7 @@ export class MedicationOrderForm implements OnInit {
     this.showUnsavedBadge = false;
 
   }
+  //restore draft
   restoreDraft() {
     const draft = this.storageService.getDraft(this.DRAFT_KEY);
     if (!draft) return;
@@ -126,6 +130,7 @@ export class MedicationOrderForm implements OnInit {
     this.form.markAsPristine();
     this.lastSaved = new Date(draft.timestamp);
   }
+  // toggle to view mode of form
   toggleViewMode() {
     this.isViewMode = !this.isViewMode;
     if (this.isViewMode) {
@@ -134,6 +139,7 @@ export class MedicationOrderForm implements OnInit {
       this.form.enable();
     }
   }
+  //clear all the field except patinetInfo
   clearAll() {
     const patientInformation = this.form.controls.patientInfo.value;
     this.form.reset({
@@ -148,6 +154,7 @@ export class MedicationOrderForm implements OnInit {
     medicationArray.clear();
     this.formService.addMedication(this.form)
   }
+  //discard the changes
   discardChanges() {
     const draft = this.storageService.getDraft(this.DRAFT_KEY);
     if (!draft) return;
@@ -166,12 +173,14 @@ export class MedicationOrderForm implements OnInit {
     medicationArray.patchValue(data.medications);
     this.form.markAsPristine();
   }
+  //for showing confirmation on reolading
   @HostListener('window:beforeunload', ['$event']) handleUnload(e: BeforeUnloadEvent) {
     if (this.form.dirty) {
       e.preventDefault();
        e.returnValue = '';
     }
   }
+  //patch values demo
   editMode() {
     console.log('Edit Mode: patchValue allows partial updates ');
     this.form.patchValue({
@@ -181,6 +190,7 @@ export class MedicationOrderForm implements OnInit {
     });
     console.log('Updated field:prescribingInfo.therapyType');
   }
+  //set values demo
   duplicateMode() {
     console.log('Duplicate Mode: setValue requires full object');
     try {
@@ -208,6 +218,7 @@ export class MedicationOrderForm implements OnInit {
       console.error('setValue Error:Missing field!', error);
     }
   }
+  //show validation  summary of all fields
   showValidationSummary() {
     const fields = [
       ['patientInfo.patientId', 'Patient Id'],
@@ -240,6 +251,7 @@ export class MedicationOrderForm implements OnInit {
       alert("Please fix the following errors:\n\n" + errors.join('\n'));
     }
   }
+  //functin to used to show the check mark to valid fields
   showValidationIcon(controlName: string) {
     const control = this.form.get(controlName);
     return control?.touched && control?.valid;

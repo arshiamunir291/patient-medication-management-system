@@ -60,6 +60,7 @@ export class MedicationFormServices {
       medication.removeAt(index);
     }
   };
+  //populates the form with existing data
   populateFromExisting(form: FormGroup, data: any): void {
     form.patchValue({
       patientInfo: data.patientInfo,
@@ -74,10 +75,12 @@ export class MedicationFormServices {
     });
     medication.patchValue(data.medications);
   }
+  //Mark all controls touched and tells form is valid or not
   validateForm(form: FormGroup): boolean {
     form.markAllAsTouched();
     return form.valid;
   }
+  //dynamic validation on the basis of therapy type
   setupTherapyTypeValidation(form: MedicationOrderFormType) {
     const prescribing = form.controls.prescribingInfo;
     prescribing.controls.therapyType.valueChanges.pipe
@@ -98,7 +101,7 @@ export class MedicationFormServices {
             ]);
             physicianControl.setValidators([
               Validators.required,
-              Validators.pattern(/^Dr\.\s[A-Za-z]+$/)
+              Validators.pattern(/^Dr\.\s* .+$/)
             ])
           } else {
             diagnosisControl.clearValidators();
@@ -115,6 +118,7 @@ export class MedicationFormServices {
   setDrugs(drugs:string[]){
     this.drugs=drugs;
   }
+  //dynamic validation on the basis of route
   setupRouteValidation(medication: MedicationForm) {
     medication.controls.routes.valueChanges.pipe(
       startWith(medication.controls.routes.value),
@@ -122,10 +126,16 @@ export class MedicationFormServices {
         route => {
           const dosageControl = medication.controls.dosage.controls.value;
           const instructionControl = medication.controls.instructions;
-          if (route === 'IV') {
+          if(!route){
             dosageControl.setValidators([
               Validators.required,
-              Validators.min(0.1)
+              dosageRangeValidator
+            ]);
+          }else if (route === 'IV') {
+            dosageControl.setValidators([
+              Validators.required,
+              Validators.min(0.1),
+              dosageRangeValidator
             ]);
             instructionControl.setValidators([
               Validators.required,
@@ -135,7 +145,8 @@ export class MedicationFormServices {
           else {
             dosageControl.setValidators([
               Validators.required,
-              Validators.min(1)
+              Validators.min(1),
+              dosageRangeValidator
             ]);
             instructionControl.clearValidators();
 
@@ -144,31 +155,45 @@ export class MedicationFormServices {
           instructionControl.updateValueAndValidity();
         });
   }
-  setupDrugValidation(medication:MedicationForm,index:number){
-    const control=medication.controls.drugName;
-    control.valueChanges.pipe(
-      debounceTime(2000),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(value => {
-      if (!value) return;
-      const exists = this.drugs.some(d => d.toLowerCase() === value.toLowerCase());
-      const errors=control.errors || {};
-      if(exists){
-        control.setErrors({
-          ...errors, drugExists:{name:value,id:'P-' + index}
-        })
-      }else{
-        delete errors['drugExists'];
-        control.setErrors(Object.keys(errors).length?errors:null);
-      }
-    
-    })
-  }
+  //Async duplicate drug Validation
+setupDrugValidation(medication: MedicationForm, index: number) {
+  const control = medication.controls.drugName;
+
+  control.valueChanges.pipe(
+    debounceTime(300),
+    distinctUntilChanged(),
+    takeUntilDestroyed(this.destroyRef)
+  ).subscribe(value => {
+    if (!value) return;
+
+    // Check for duplicates across the whole array
+    const medicationsArray = (control.parent?.parent as FormArray);
+    if (!medicationsArray) return;
+
+    const names = medicationsArray.controls
+      .map(c => c.get('drugName')?.value)
+      .filter(Boolean);
+
+    const duplicate = names.find((drug, idx) => names.indexOf(drug) !== idx);
+
+    const errors = control.errors || {};
+    if (duplicate) {
+      control.setErrors({ ...errors, drugExists: { name: value, id: 'P-' + index } });
+    } else {
+      delete errors['drugExists'];
+      control.setErrors(Object.keys(errors).length ? errors : null);
+    }
+
+    // Also trigger FormArray validator to update duplicateDrug error
+    medicationsArray.updateValueAndValidity({ onlySelf: true });
+  });
+}
+  //Combine route and drug validations for a medication group
   setupMedicationLogic(medication:MedicationForm,index:number){
     this.setupRouteValidation(medication);
     this.setupDrugValidation(medication,index);
   }
+  //initialize dynamic validation
    initializeForm(form:MedicationOrderFormType){
     this.setupTherapyTypeValidation(form);
     form.controls.medications.controls.forEach((med,index)=>{
