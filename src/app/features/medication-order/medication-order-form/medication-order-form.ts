@@ -89,18 +89,29 @@ export class MedicationOrderForm implements OnInit {
   //submit button logic
 submitForm() {
  if (!this.formService.validateForm(this.form)) {
-    this.form.markAllAsTouched();
     this.showValidationSummary();
     return;
   }
-  this.form.reset();
+  this.form.reset({
+    patientInfo:{
+      patientId:'',
+      orderDate:''
+    },
+    prescribingInfo:{
+      physicians:'',
+      therapyType:'',
+      diagnosis:''
+    }
+  });
   this.form.markAsUntouched();
+  this.form.markAsPristine();
+  this.form.updateValueAndValidity();
+  // this.formService.initializeForm(this.form)
   // Log submitted data
   console.log(this.form.getRawValue());
   console.log(this.form.value);
   this.showUnsavedBadge = false;
   this.storageService.clearDraft(this.DRAFT_KEY);
-
   this.snackBar.open('Medication order submitted successfully', 'Close', { duration: 3000 });
 } //save the draft
   saveDraft() {
@@ -256,4 +267,5 @@ submitForm() {
     const control = this.form.get(controlName);
     return control?.touched && control?.valid;
   }
+  
 }

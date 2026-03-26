@@ -18,14 +18,14 @@ export class MedicationFormServices {
       patientInfo: this.fb.group({
         patientId: ['', Validators.required],
         orderDate: ['', Validators.required]
-      }),
+      },{updateOn:'blur'}),
       prescribingInfo: this.fb.group({
         physicians: this.fb.control({ value: '', disabled: true }),
         therapyType: ['', Validators.required],
         diagnosis: ['']
       },{validators: requiredDiagnosisValidator}),
       medications: this.fb.array([this.createMedicationGroup()], duplicateDrugValidator)
-    });
+    },{updateOn:'blur'});
   };
   createDosageGroup() {
     return this.fb.group({
