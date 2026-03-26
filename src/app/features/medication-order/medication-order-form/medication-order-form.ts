@@ -92,6 +92,13 @@ submitForm() {
     this.showValidationSummary();
     return;
   }
+  const submittedData = this.form.getRawValue();
+  const submittedValue = this.form.value;
+
+  // Log submitted data before reset so disabled controls are included in the demo.
+  console.log(submittedData);
+  console.log(submittedValue);
+
   this.form.reset({
     patientInfo:{
       patientId:'',
@@ -106,10 +113,7 @@ submitForm() {
   this.form.markAsUntouched();
   this.form.markAsPristine();
   this.form.updateValueAndValidity();
-  // this.formService.initializeForm(this.form)
-  // Log submitted data
-  console.log(this.form.getRawValue());
-  console.log(this.form.value);
+
   this.showUnsavedBadge = false;
   this.storageService.clearDraft(this.DRAFT_KEY);
   this.snackBar.open('Medication order submitted successfully', 'Close', { duration: 3000 });
@@ -125,19 +129,7 @@ submitForm() {
   restoreDraft() {
     const draft = this.storageService.getDraft(this.DRAFT_KEY);
     if (!draft) return;
-    const data = draft.data;
-    this.form.patchValue({
-      patientInfo: data.patientInfo,
-      prescribingInfo: data.prescribingInfo
-    });
-    const medicationArray = this.form.controls.medications;
-    medicationArray.clear();
-    data.medications.forEach((_:any,index:number) => {
-      const med=this.formService.createMedicationGroup();
-      this.formService.setupMedicationLogic(med,index);
-      medicationArray.push(med);
-    });
-    medicationArray.patchValue(data.medications);
+    this.formService.populateFromExisting(this.form, draft.data);
     this.form.markAsPristine();
     this.lastSaved = new Date(draft.timestamp);
   }
@@ -169,19 +161,7 @@ submitForm() {
   discardChanges() {
     const draft = this.storageService.getDraft(this.DRAFT_KEY);
     if (!draft) return;
-    const data = draft.data;
-    this.form.patchValue({
-      patientInfo: data.patientInfo,
-      prescribingInfo: data.prescribingInfo
-    });
-    const medicationArray = this.form.controls.medications;
-    medicationArray.clear();
-    data.medications.forEach((_:any,index:number) => {
-      const med=this.formService.createMedicationGroup();
-      this.formService.setupMedicationLogic(med,index);
-      medicationArray.push(med);
-    });
-    medicationArray.patchValue(data.medications);
+    this.formService.populateFromExisting(this.form, draft.data);
     this.form.markAsPristine();
   }
   //for showing confirmation on reolading

@@ -16,10 +16,9 @@ export function dosageRangeValidator(control:AbstractControl):ValidationErrors|n
     return null;
 };
 //diagnosed Validator
- export function requiredDiagnosisValidator(therapyTypeControl:AbstractControl):ValidationErrors | null{
-    if(!therapyTypeControl.parent) return null;
-    const therapyType=therapyTypeControl.value;
-    const diagnosis=therapyTypeControl.parent.get('diagnosis')?.value;
+ export function requiredDiagnosisValidator(control:AbstractControl):ValidationErrors | null{
+    const therapyType = control.get('therapyType')?.value;
+    const diagnosis = control.get('diagnosis')?.value;
     if(therapyType === "Chemotherapy" && !diagnosis){
         return {requiredDiagnosis:true};
     }

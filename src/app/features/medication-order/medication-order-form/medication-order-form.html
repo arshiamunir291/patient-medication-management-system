@@ -88,6 +88,11 @@
         <mat-card-title>Medications</mat-card-title>
         <mat-card-content>
             <p>Medication added {{medications.length}}/10</p>
+            @if (form.controls.medications.errors?.['duplicateDrug']) {
+            <p class="error-message">
+                Drug {{ form.controls.medications.errors?.['duplicateDrug']?.drugName }} is selected more than once.
+            </p>
+            }
             <div formArrayName="medications">
                 @for (medication of medications.controls; track $index; let i=$index) {
                 <app-medication-card [group]="medication" [index]="i" (remove)="removeMedication($event)"
